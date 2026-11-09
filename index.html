@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anye XV | Invytia</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@200;400;600&family=Great+Vibes&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --blush: #E9BFB9;
+            --blush-claro: #FBF3F1;
+            --blush-satinado: #F6E6E3;
+            --blush-rico: #F0D3CF;
+            --dorado: #B98E4A;
+            --dorado-claro: #D9B76F;
+            --texto: #4A2E2B;
+        }
+        body { font-family: 'Montserrat', sans-serif; background-color: var(--blush-claro); color: var(--texto); margin: 0; overflow-x: hidden; }
+        .font-name { font-family: 'Playfair Display', serif; }
+        .font-cursive { font-family: 'Great Vibes', cursive; }
+        .gold-text { background: linear-gradient(90deg, #A67C37, #E3C27D, #A67C37); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+        #envelope-wrapper { perspective: 1000px; position: relative; z-index: 60; }
+        #envelope { width: 320px; height: 220px; background: white; position: relative; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.15); border-radius: 0 0 12px 12px; display: flex; align-items: center; justify-content: center; border-bottom: 3px solid var(--dorado-claro); }
+        #flap { position: absolute; top: 0; left: 0; width: 0; height: 0; border-left: 160px solid transparent; border-right: 160px solid transparent; border-top: 90px solid var(--blush); transform-origin: top; transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1); z-index: 2; }
+        .open #flap { transform: rotateX(180deg); }
+        .envelope-content { position: relative; z-index: 1; padding-top: 45px; text-align: center; }
+
+        #music-control { position: fixed; bottom: 25px; right: 25px; z-index: 200; padding: 12px 24px; background: white; border-radius: 50px; align-items: center; justify-content: center; box-shadow: 0 10px 25px rgba(0,0,0,0.1); cursor: pointer; display: none; font-size: 10px; font-weight: 800; letter-spacing: 2px; border: 1px solid var(--dorado); color: var(--dorado); }
+
+        .gallery-container { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth; -webkit-overflow-scrolling: touch; -ms-overflow-style: none; scrollbar-width: none; }
+        .gallery-container::-webkit-scrollbar { display: none; }
+        .gallery-item { flex: 0 0 280px; scroll-snap-align: start; user-select: none; -webkit-user-drag: none; }
+
+        .sparkle-glow { animation: pulseSparkle 2s infinite ease-in-out alternate; }
+        @keyframes pulseSparkle { 0% { transform: scale(0.6) rotate(0deg); opacity: 0.2; } 100% { transform: scale(1.1) rotate(90deg); opacity: 0.8; } }
+
+        .anim-fade-up { opacity: 0; transform: translateY(30px); transition: all 1s cubic-bezier(0.25, 1, 0.5, 1); }
+        .anim-fade-up.visible { opacity: 1; transform: translateY(0); }
+        #main-content { opacity: 0; transition: opacity 1.5s ease; }
+        .show-content { opacity: 1 !important; }
+        .btn-main { background: linear-gradient(135deg, #A67C37, #D9B76F); color: white; }
+
+        .ring-box { position: relative; width: 74px; height: 74px; filter: drop-shadow(0 8px 14px rgba(185,142,74,0.22)); }
+        @media (min-width: 768px) { .ring-box { width: 96px; height: 96px; } }
+        .ring { width: 100%; height: 100%; transform: rotate(-90deg); }
+        .ring-bg { fill: rgba(255,255,255,0.9); stroke: rgba(185,142,74,0.22); stroke-width: 3; }
+        .ring-fg { fill: none; stroke: url(#goldGrad); stroke-width: 4; stroke-linecap: round; stroke-dasharray: 276.46; stroke-dashoffset: 276.46; transition: stroke-dashoffset 0.6s ease; }
+        .ring-inner { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .ring-num { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.5rem; line-height: 1; color: var(--texto); }
+        .ring-lbl { font-size: 8px; letter-spacing: 0.2em; text-transform: uppercase; font-weight: 700; color: var(--dorado); margin-top: 3px; }
+        @media (min-width: 768px) { .ring-num { font-size: 2rem; } .ring-lbl { font-size: 9px; } }
+    </style>
+</head>
+<body class="overflow-hidden">
+
+    <audio id="invite-music" loop><source src="assets/song.mp3" type="audio/mpeg"></audio>
+    <div id="music-control" onclick="toggleMusic()"><span id="music-text">PAUSAR</span></div>
+
+    <!-- SOBRE -->
+    <div id="opening-overlay" class="fixed inset-0 z-[100] flex flex-col items-center justify-center transition-opacity duration-1000 overflow-hidden" style="background: linear-gradient(135deg, var(--blush-claro), var(--blush-satinado), var(--blush-rico));">
+        <svg class="absolute sparkle-glow" style="top: 15%; left: 10%; width: 28px; color: rgba(185,142,74,0.6);" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0L14.5 9.5L24 12L14.5 14.5L12 24L9.5 14.5L0 12L9.5 9.5Z"/></svg>
+        <svg class="absolute sparkle-glow" style="top: 25%; right: 15%; width: 40px; color: rgba(185,142,74,0.35); animation-delay: -1s;" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0L14.5 9.5L24 12L14.5 14.5L12 24L9.5 14.5L0 12L9.5 9.5Z"/></svg>
+
+        <div id="envelope-wrapper">
+            <div id="envelope">
+                <div id="flap"></div>
+                <div class="envelope-content">
+                    <p class="font-cursive text-2xl" style="color: var(--dorado);">Mis XV Años</p>
+                    <h2 class="font-cursive text-5xl mt-1" style="color: var(--texto);">Anye</h2>
+                </div>
+            </div>
+        </div>
+        <button onclick="iniciarApertura()" id="btn-abrir" class="mt-12 px-10 py-3 bg-white rounded-full font-bold tracking-[0.2em] text-xs hover:scale-105 transition-all relative z-10" style="color: var(--texto); box-shadow: 0 10px 25px rgba(74,46,43,0.1); border: 1px solid var(--dorado-claro);">
+            ABRIR INVITACIÓN
+        </button>
+    </div>
+
+    <main id="main-content" class="hidden relative">
+
+        <!-- PORTADA -->
+        <section class="relative h-[95vh] w-full flex items-end justify-center pb-12 -mt-[15px] overflow-hidden">
+            <img src="assets/hero.jpg" alt="Anye" class="absolute inset-0 w-full h-full object-cover">
+            <div class="absolute inset-0" style="background: linear-gradient(to top, var(--blush-satinado), rgba(246,230,227,0.4), transparent);"></div>
+            <div class="relative text-center drop-shadow-md">
+                <p class="font-cursive text-4xl md:text-5xl font-bold" style="color: var(--texto);">Mis XV Años</p>
+                <h1 class="font-cursive text-8xl md:text-9xl mt-2" style="color: var(--texto);">Anye</h1>
+            </div>
+        </section>
+
+        <!-- CONTADOR -->
+        <section class="py-16 text-center relative overflow-hidden" style="background: linear-gradient(to bottom, var(--blush-satinado), var(--blush-claro));">
+            <svg width="0" height="0" style="position:absolute"><defs><linearGradient id="goldGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#A67C37"/><stop offset="50%" stop-color="#E3C27D"/><stop offset="100%" stop-color="#A67C37"/></linearGradient></defs></svg>
+            <p class="font-cursive text-4xl mb-8 gold-text">Faltan</p>
+            <div id="countdown" class="flex justify-center gap-3 md:gap-8 px-4 relative z-10">
+                <div class="ring-box"><svg class="ring" viewBox="0 0 100 100"><circle class="ring-bg" cx="50" cy="50" r="44"/><circle class="ring-fg" id="ring-days" cx="50" cy="50" r="44"/></svg><div class="ring-inner"><span class="ring-num" id="days">00</span><span class="ring-lbl">Días</span></div></div>
+                <div class="ring-box"><svg class="ring" viewBox="0 0 100 100"><circle class="ring-bg" cx="50" cy="50" r="44"/><circle class="ring-fg" id="ring-hours" cx="50" cy="50" r="44"/></svg><div class="ring-inner"><span class="ring-num" id="hours">00</span><span class="ring-lbl">Hrs</span></div></div>
+                <div class="ring-box"><svg class="ring" viewBox="0 0 100 100"><circle class="ring-bg" cx="50" cy="50" r="44"/><circle class="ring-fg" id="ring-minutes" cx="50" cy="50" r="44"/></svg><div class="ring-inner"><span class="ring-num" id="minutes">00</span><span class="ring-lbl">Min</span></div></div>
+                <div class="ring-box"><svg class="ring" viewBox="0 0 100 100"><circle class="ring-bg" cx="50" cy="50" r="44"/><circle class="ring-fg" id="ring-seconds" cx="50" cy="50" r="44"/></svg><div class="ring-inner"><span class="ring-num" id="seconds">00</span><span class="ring-lbl">Seg</span></div></div>
+            </div>
+        </section>
+
+        <!-- PADRES Y PADRINOS -->
+        <section class="py-20 px-6 text-center relative overflow-hidden" style="background: linear-gradient(to bottom, var(--blush-claro), var(--blush-satinado), white);">
+            <svg class="absolute sparkle-glow" style="top: 10%; left: 15%; width: 25px; color: rgba(185,142,74,0.35);" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0L14.5 9.5L24 12L14.5 14.5L12 24L9.5 14.5L0 12L9.5 9.5Z"/></svg>
+            <div class="max-w-2xl mx-auto py-12 relative z-10 anim-fade-up" style="border-top: 2px solid rgba(185,142,74,0.5); border-bottom: 2px solid rgba(185,142,74,0.5);">
+                <p class="uppercase tracking-[0.3em] text-[11px] font-bold mb-6 opacity-70" style="color: var(--texto);">Con la bendición de mi madre</p>
+                <h3 class="font-cursive text-4xl md:text-5xl font-bold" style="color: var(--texto);">Anahi Rodríguez</h3>
+
+                <p class="uppercase tracking-[0.3em] text-[11px] font-bold mb-6 mt-12 opacity-70" style="color: var(--texto);">Y de mis padrinos</p>
+                <h3 class="font-cursive text-3xl md:text-4xl font-bold" style="color: var(--texto);">Víctor Hugo Arroyo</h3>
+                <p class="font-cursive text-2xl my-2" style="color: var(--dorado);">&</p>
+                <h3 class="font-cursive text-3xl md:text-4xl font-bold" style="color: var(--texto);">Marisol Asian</h3>
+            </div>
+        </section>
+
+        <!-- FECHA -->
+        <section class="py-20 text-center relative overflow-hidden" style="background: linear-gradient(to bottom, white, rgba(233,191,185,0.3), white);">
+            <h2 class="font-name text-4xl md:text-6xl font-bold tracking-[0.2em] relative z-10 uppercase gold-text">28 de Noviembre</h2>
+            <p class="font-name text-2xl mt-4 tracking-[0.1em] relative z-10" style="color: var(--texto);">2026</p>
+        </section>
+
+        <!-- MENSAJE -->
+        <section class="py-16 px-8 text-center bg-white anim-fade-up">
+            <p class="font-cursive text-3xl md:text-4xl max-w-xl mx-auto leading-relaxed" style="color: var(--texto);">
+                “Hay momentos en la vida que se vuelven inolvidables, y este será uno de ellos. Gracias por acompañarme y ser parte de este sueño tan especial. Su presencia hará que mis XV años sean aún más mágicos.”
+            </p>
+        </section>
+
+        <!-- UBICACIONES -->
+        <section class="py-16 px-4 md:px-8" style="background-color: var(--blush-claro);">
+            <div class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
+
+                <div class="rounded-[3rem] overflow-hidden shadow-xl anim-fade-up bg-white" style="border: 1px solid rgba(185,142,74,0.3);">
+                    <div class="p-10 text-center">
+                        <svg class="w-12 h-12 mx-auto mb-4" style="color: var(--dorado);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.2" d="M12 2v4m-2-2h4M5 22V12l7-5 7 5v10M9 22v-5a3 3 0 016 0v5"/></svg>
+                        <h2 class="font-name text-3xl mb-1" style="color: var(--texto);">Ceremonia Religiosa</h2>
+                        <h3 class="font-bold tracking-widest text-lg mb-4" style="color: var(--dorado);">5:00 P.M.</h3>
+                        <p class="font-semibold text-sm uppercase tracking-wider mb-2" style="color: var(--texto); opacity: 0.7;">Parroquia y Exconvento de los Santos Reyes</p>
+                        <p class="text-gray-500 text-sm leading-relaxed mb-8">Metztitlán, Hidalgo</p>
+                        <a href="https://maps.app.goo.gl/5A7xQr7gdVHQu2uq9?g_st=ic" target="_blank" class="btn-main inline-block px-8 py-4 rounded-2xl text-[10px] tracking-widest font-bold shadow-lg w-full md:w-auto">VER UBICACIÓN</a>
+                    </div>
+                </div>
+
+                <div class="rounded-[3rem] overflow-hidden shadow-xl anim-fade-up bg-white" style="border: 1px solid rgba(185,142,74,0.3); transition-delay: 0.2s;">
+                    <div class="p-10 text-center">
+                        <svg class="w-12 h-12 mx-auto mb-4" style="color: var(--dorado);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.2" d="M8 3v8a2 2 0 002 2h0V3M10 13v8M16 3c-1.5 2-2 4-2 6s1 3 2 3v9"/></svg>
+                        <h2 class="font-name text-3xl mb-1" style="color: var(--texto);">Recepción</h2>
+                        <h3 class="font-bold tracking-widest text-lg mb-4" style="color: var(--dorado);">6:30 P.M.</h3>
+                        <p class="font-semibold text-sm uppercase tracking-wider mb-2" style="color: var(--texto); opacity: 0.7;">Salón Hotele Los Bambues</p>
+                        <p class="text-gray-500 text-sm leading-relaxed mb-8">Metztitlán, Hidalgo</p>
+                        <a href="https://maps.app.goo.gl/wamyyoU5jrbsWXcK7?g_st=ic" target="_blank" class="btn-main inline-block px-8 py-4 rounded-2xl text-[10px] tracking-widest font-bold shadow-lg w-full md:w-auto">VER UBICACIÓN</a>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- GALERÍA -->
+        <section class="py-20 relative overflow-hidden" style="background-color: var(--blush-satinado);">
+            <div class="text-center mb-6">
+                <h2 class="font-cursive text-5xl" style="color: var(--texto);">Mis Momentos</h2>
+                <p class="text-[9px] uppercase tracking-widest mt-1 font-semibold opacity-80" style="color: var(--dorado);">Desliza para ver más</p>
+            </div>
+            <div class="gallery-container cursor-grab active:cursor-grabbing px-6 gap-6 py-4 md:justify-center" id="gallery-slider">
+                <div class="gallery-item"><img src="assets/galeria1.jpg" alt="Momento 1" class="h-[380px] w-[280px] object-cover rounded-[2rem] shadow-lg pointer-events-none"></div>
+                <div class="gallery-item"><img src="assets/galeria2.jpg" alt="Momento 2" class="h-[380px] w-[280px] object-cover rounded-[2rem] shadow-lg pointer-events-none"></div>
+            </div>
+        </section>
+
+        <!-- VESTIMENTA -->
+        <section class="py-16 px-8 text-center bg-white anim-fade-up">
+            <svg class="w-12 h-12 mx-auto mb-3" style="color: var(--dorado);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.2" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09l2.846.813-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z"></path>
+            </svg>
+            <h2 class="font-name text-2xl mb-4" style="color: var(--texto);">Código de Vestimenta</h2>
+            <p class="font-light italic max-w-sm mx-auto" style="color: var(--dorado);">Te pedimos no usar color rosa con dorado.</p>
+        </section>
+
+        <!-- MESA DE REGALOS -->
+        <section class="py-16 px-8 text-center relative overflow-hidden anim-fade-up" style="background: linear-gradient(to bottom, white, var(--blush-rico), var(--blush-claro)); border-top: 1px solid rgba(185,142,74,0.25);">
+            <svg class="w-12 h-12 mx-auto mb-4" style="color: var(--dorado);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.2" d="M3 8l9 6 9-6M5 6h14a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2z"/></svg>
+            <h2 class="font-name text-3xl mb-4" style="color: var(--texto);">Mesa de Regalos</h2>
+            <p class="uppercase tracking-[0.2em] text-lg font-bold" style="color: var(--dorado);">Lluvia de sobres</p>
+        </section>
+
+        <!-- CONFIRMACIÓN -->
+        <section class="py-16 px-6 anim-fade-up" style="background-color: var(--blush-claro);" id="confirmacion">
+            <div class="max-w-md mx-auto bg-white p-10 rounded-[3rem] shadow-xl text-center" style="border: 1px solid rgba(185,142,74,0.3);">
+                <h2 class="font-name text-2xl mb-6 uppercase tracking-widest" style="color: var(--texto);">Confirmar</h2>
+                <input type="text" id="rsvp-nombre" placeholder="Nombre completo" class="w-full p-4 mb-4 rounded-2xl outline-none" style="background-color: rgba(233,191,185,0.15); border: 1px solid rgba(185,142,74,0.4); color: var(--texto);">
+                <select id="rsvp-asistencia" class="w-full p-4 mb-6 rounded-2xl outline-none" style="background-color: rgba(233,191,185,0.15); border: 1px solid rgba(185,142,74,0.4); color: var(--texto);">
+                    <option value="Confirmado">Sí, asistiré</option>
+                    <option value="No asistirá">No podré asistir</option>
+                </select>
+                <button onclick="procesarConfirmacion()" id="btn-rsvp" class="btn-main w-full py-4 rounded-2xl font-bold tracking-widest text-[10px] transition-colors">ENVIAR Y NOTIFICAR POR WHATSAPP</button>
+            </div>
+        </section>
+
+        <!-- MURO DE DESEOS -->
+        <section class="py-16 px-6 text-center bg-white anim-fade-up">
+            <h2 class="font-name text-3xl mb-8" style="color: var(--texto);">Muro de Deseos</h2>
+            <div class="max-w-2xl mx-auto space-y-4">
+                <textarea id="muro-mensaje" placeholder="Déjale un mensaje lindo a Anye..." class="w-full h-40 p-8 rounded-3xl outline-none italic resize-none" style="background-color: var(--blush-claro); border: 1px solid rgba(185,142,74,0.4); color: var(--texto);"></textarea>
+                <input type="text" id="muro-nombre" placeholder="Tu nombre" class="w-full p-4 rounded-2xl outline-none" style="background-color: var(--blush-claro); border: 1px solid rgba(185,142,74,0.4); color: var(--texto);">
+                <button onclick="enviarDeseo()" id="btn-muro" class="px-12 py-4 rounded-full font-bold text-[10px] tracking-widest transition-colors" style="border: 2px solid var(--dorado); color: var(--dorado);">PUBLICAR MENSAJE</button>
+            </div>
+        </section>
+
+        <footer class="py-10 text-center text-[9px] tracking-[0.5em]" style="color: rgba(185,142,74,0.8);">INVYTIA</footer>
+    </main>
+
+    <script>
+        const audio = document.getElementById('invite-music');
+        const musicText = document.getElementById('music-text');
+        // Pega aquí la URL de tu Apps Script (misma lógica del Panel de Confirmaciones en Google Sheets)
+        const URL_SCRIPT = 'PEGAR_URL_DEL_SCRIPT_AQUI';
+        const WHATSAPP = '527716299536';
+        const FECHA_EVENTO = "November 28, 2026 17:00:00";
+
+        function iniciarApertura() {
+            document.getElementById('envelope-wrapper').classList.add('open');
+            document.getElementById('btn-abrir').style.display = 'none';
+            audio.play().catch(e => console.log("Audio deferred"));
+            document.getElementById('music-control').style.display = 'flex';
+
+            setTimeout(() => {
+                document.getElementById('opening-overlay').style.opacity = '0';
+                document.getElementById('main-content').classList.remove('hidden');
+                initObserver();
+                initDraggableSlider();
+                setTimeout(() => {
+                    document.getElementById('opening-overlay').style.display = 'none';
+                    document.getElementById('main-content').classList.add('show-content');
+                    document.body.style.overflowY = 'auto';
+                    startCountdown();
+                }, 1000);
+            }, 1500);
+        }
+
+        function initObserver() {
+            const observer = new IntersectionObserver(entries => {
+                entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('visible'); });
+            }, { threshold: 0.1 });
+            document.querySelectorAll('.anim-fade-up').forEach(el => observer.observe(el));
+        }
+
+        function initDraggableSlider() {
+            const slider = document.getElementById('gallery-slider');
+            let isDown = false, startX, scrollLeft;
+            slider.addEventListener('mousedown', e => { isDown = true; startX = e.pageX - slider.offsetLeft; scrollLeft = slider.scrollLeft; slider.style.scrollBehavior = 'auto'; });
+            slider.addEventListener('mouseleave', () => { isDown = false; });
+            slider.addEventListener('mouseup', () => { isDown = false; slider.style.scrollBehavior = 'smooth'; });
+            slider.addEventListener('mousemove', e => {
+                if (!isDown) return;
+                e.preventDefault();
+                const x = e.pageX - slider.offsetLeft;
+                slider.scrollLeft = scrollLeft - (x - startX) * 1.5;
+            });
+        }
+
+        async function procesarConfirmacion() {
+            const nombre = document.getElementById('rsvp-nombre').value.trim();
+            const asistencia = document.getElementById('rsvp-asistencia').value;
+            const btn = document.getElementById('btn-rsvp');
+            if (!nombre) return alert("Por favor escribe tu nombre");
+
+            btn.innerText = "REGISTRANDO...";
+            try {
+                await fetch(URL_SCRIPT, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ tipo: 'confirmacion', nombre, asistencia }) });
+                const msg = `¡Hola! Confirmo mi asistencia a los XV de Anye: ${nombre}. Estado: ${asistencia}`;
+                window.open(`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(msg)}`, '_blank');
+                btn.innerText = "¡REGISTRADO!";
+            } catch (e) { alert("Error al conectar"); btn.innerText = "REINTENTAR"; }
+        }
+
+        async function enviarDeseo() {
+            const mensaje = document.getElementById('muro-mensaje').value.trim();
+            const nombre = document.getElementById('muro-nombre').value.trim();
+            const btn = document.getElementById('btn-muro');
+            if (!mensaje || !nombre) return alert("Llena ambos campos");
+            btn.innerText = "PUBLICANDO...";
+            try {
+                await fetch(URL_SCRIPT, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ tipo: 'deseo', mensaje, nombre }) });
+                alert("¡Mensaje publicado con éxito!");
+                document.getElementById('muro-mensaje').value = "";
+                document.getElementById('muro-nombre').value = "";
+            } catch (e) { alert("Error al conectar"); }
+            btn.innerText = "PUBLICAR MENSAJE";
+        }
+
+        function setRing(id, val, max) {
+            document.getElementById(id).innerText = String(val).padStart(2, '0');
+            const off = 276.46 * (1 - Math.min(val / max, 1));
+            document.getElementById('ring-' + id).style.strokeDashoffset = off;
+        }
+
+        function startCountdown() {
+            const target = new Date(FECHA_EVENTO).getTime();
+            const tick = () => {
+                const dist = target - new Date().getTime();
+                if (dist > 0) {
+                    setRing('days', Math.floor(dist / 86400000), 60);
+                    setRing('hours', Math.floor((dist % 86400000) / 3600000), 24);
+                    setRing('minutes', Math.floor((dist % 3600000) / 60000), 60);
+                    setRing('seconds', Math.floor((dist % 60000) / 1000), 60);
+                }
+            };
+            tick();
+            setInterval(tick, 1000);
+        }
+
+        function toggleMusic() {
+            if (audio.paused) { audio.play(); musicText.innerText = "PAUSAR"; }
+            else { audio.pause(); musicText.innerText = "REANUDAR"; }
+        }
+    </script>
+</body>
+</html>
